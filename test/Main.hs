@@ -1,6 +1,7 @@
 {-# Language DerivingVia #-}
 {-# Language DataKinds #-}
 {-# Language TemplateHaskell #-}
+{-# Language DeriveAnyClass #-}
 
 module Main where
 
@@ -70,3 +71,38 @@ prop_record_sum_encodes_as_expected = once . property $
 prop_record_sum_decodes_as_expected :: Property
 prop_record_sum_decodes_as_expected = once . property $
   tripping (MkDeleteArticle $ DeleteArticle 9) encode decode
+
+
+data MyVal
+instance ToConstant MyVal where toConstant _ = Number 1
+
+data X = X {xval :: Int}
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via
+    WithConstantFields
+      '["bar" := "baaz", "quux" := MyVal]
+      (GenericEncoded '[] X)
+
+prop_constant_fields_encode_as_expected :: Property
+prop_constant_fields_encode_as_expected = once . property $
+  encode (X 9)
+    === "{\"xval\":9,\"quux\":1,\"bar\":\"baaz\"}"
+
+prop_constant_fields_decode_as_expected :: Property
+prop_constant_fields_decode_as_expected = once . property $
+  tripping (X 9) encode decode
+
+
+data Y = Y {yval :: Int}
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via
+    SingleFieldObject "boop" (GenericEncoded '[] Y)
+
+prop_single_field_objects_encode_as_expected :: Property
+prop_single_field_objects_encode_as_expected = once . property $
+  encode (Y 7)
+    === "{\"boop\":{\"yval\":7}}"
+
+prop_single_field_objects_decode_as_expected :: Property
+prop_single_field_objects_decode_as_expected = once . property $
+  tripping (Y 7) encode decode

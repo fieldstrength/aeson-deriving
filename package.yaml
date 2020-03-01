@@ -68,3 +68,4 @@ library:
         - Data.Aeson.Deriving.Generic
         - Data.Aeson.Deriving.RecordSum
         - Data.Aeson.Deriving.SingleFieldObject
+        - Data.Aeson.Deriving.WithConstantFields
