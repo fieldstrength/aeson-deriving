@@ -9,12 +9,22 @@ import qualified Data.HashMap.Strict as HashMap
 import           Data.Kind (Type)
 import           Data.Proxy
 import           GHC.Generics
+import           Data.Bifunctor (first)
 
 
 newtype ParserMap a = ParserMap (HashMap String (Value -> Parser a))
   deriving stock Functor
   deriving newtype (Semigroup, Monoid)
 
+unsafeMapKeys :: (String -> String) -> ParserMap a -> ParserMap a
+unsafeMapKeys f (ParserMap hm)
+  = ParserMap
+  . HashMap.fromList
+  . fmap (first f)
+  $ HashMap.toList hm
+
+-- | Provides a map from the (Haskell) constructor names of the inner contained types,
+--   To parsers for the (Rep of the) outer data type that carries them.
 class GTagParserMap (repA :: Type -> Type) where
   gParserMap :: Proxy (repA ()) -> ParserMap (repA ())
 

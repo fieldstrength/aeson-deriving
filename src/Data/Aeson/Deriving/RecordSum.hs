@@ -1,5 +1,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE PolyKinds #-}
 
 -- | Provides Generic functionality to track the parsers for different
 --   unary constructors of a sum type, in order to improve error messages.
@@ -20,8 +21,19 @@ import           Data.Text (pack)
 import           GHC.Generics
 import           GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
 
-
-newtype RecordSumEncoded (tagKey :: Symbol) (a :: Type) = RecordSumEncoded a
+-- | An encoding scheme for sums of records that are defined as distinct data types.
+--   If we have a number of record types we want to combine under a sum, a straightforward
+--   solution is to ensure that each each inner type uses a constructor tag, and then
+--   derive the sum with @SumEncoding := UntaggedValue@. This works fine for the happy
+--   path, but makes for very bad error messages, since it means that decoding proceeds by
+--   trying each case in sequence. Thus error messages always pertain to the last type in
+--   the sum, even when it wasn't the intended payload. This newtype improves on that
+--   solution by providing the relevant error messages, by remembering the correspondence
+--   between the constructor tag and the intended inner type/parser.
+--
+--   In order to work correctly, the inner types must use the 'TaggedObject' encoding.
+--   The same tag field name and 'ConstructorTagModifier' must be supplied to this type.
+newtype RecordSumEncoded (tagKey :: Symbol) (tagModifier :: k) (a :: Type) = RecordSumEncoded a
 
 instance
   ( Generic a
@@ -29,8 +41,9 @@ instance
   , GTagParserMap (Rep a)
   , Rep a ~ D1 meta cs
   , Datatype meta
+  , StringFunction tagModifier
   , KnownSymbol tagKey)
-    => FromJSON (RecordSumEncoded tagKey a) where
+    => FromJSON (RecordSumEncoded tagKey tagModifier a) where
       parseJSON val = prependErrMsg outerErrorMsg . flip (withObject "Object") val $ \hm -> do
         tagVal <- hm .: pack tagKeyStr
         case HashMap.lookup tagVal parserMap of
@@ -49,7 +62,10 @@ instance
 
         where
           tagKeyStr = symbolVal $ Proxy @tagKey
-          ParserMap parserMap = gParserMap $ Proxy @(Rep a ())
+          ParserMap parserMap
+            = unsafeMapKeys (stringFunction $ Proxy @tagModifier)
+            . gParserMap
+            $ Proxy @(Rep a ())
           backticks str = "`" <> str <> "`"
           prependErrMsg str = modifyFailure (str <>)
           outerErrorMsg = "Failed to parse a " <> datatypeName @meta undefined <> ": "
@@ -58,5 +74,6 @@ instance
 instance
   ( Generic a
   , GToJSON Zero (Rep a))
-    => ToJSON (RecordSumEncoded tagKey a) where
-      toJSON (RecordSumEncoded x) = toJSON (GenericEncoded @'[SumEncoding := UntaggedValue] x)
+    => ToJSON (RecordSumEncoded tagKey tagModifier a) where
+      toJSON (RecordSumEncoded x) =
+        toJSON $ GenericEncoded @'[SumEncoding := UntaggedValue] x
