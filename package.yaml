@@ -40,6 +40,21 @@ dependencies:
     - unordered-containers
     - text
 
+tests:
+    spec:
+        ghc-options:
+            - -Wall
+            - -Wredundant-constraints
+            - -Wincomplete-record-updates
+            - -Wincomplete-uni-patterns
+        source-dirs: test
+        main:
+          Main.hs
+
+        dependencies:
+            - aeson-deriving
+            - hedgehog
+
 library:
     ghc-options:
         - -Wall
