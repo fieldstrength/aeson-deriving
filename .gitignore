@@ -1,0 +1,5 @@
+.stack-work/
+aeson-deriving.cabal
+*~
+dist/
+

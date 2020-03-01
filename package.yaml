@@ -1,0 +1,55 @@
+name:                aeson-deriving
+version:             0.1.0.0
+github:              "fieldstrength/aeson-deriving"
+license:             MIT
+author:              "Cliff Harvey"
+maintainer:          "cs.hbar+hs@gmail.com"
+copyright:           "2020"
+
+extra-source-files:
+    - README.md
+    - ChangeLog.md
+
+synopsis:            data types for compositional, type-directed serialization
+
+category:            Serialization
+
+description:         Please see the README on GitHub at <https://github.com/fieldstrength/aeson-deriving#readme>
+
+default-extensions:
+    - ConstraintKinds
+    - DataKinds
+    - DeriveFunctor
+    - DeriveGeneric
+    - DerivingStrategies
+    - FlexibleContexts
+    - FlexibleInstances
+    - GeneralizedNewtypeDeriving
+    - KindSignatures
+    - LambdaCase
+    - NamedFieldPuns
+    - OverloadedStrings
+    - ScopedTypeVariables
+    - TupleSections
+    - TypeApplications
+    - TypeOperators
+
+dependencies:
+    - base >= 4.7 && < 5
+    - aeson >= 1.2 && < 1.5
+    - unordered-containers
+    - text
+
+library:
+    ghc-options:
+        - -Wall
+        - -Wredundant-constraints
+        - -Wincomplete-record-updates
+        - -Wincomplete-uni-patterns
+    source-dirs: src
+
+    exposed-modules:
+        - Data.Aeson.Deriving
+        - Data.Aeson.Deriving.Generic
+        - Data.Aeson.Deriving.RecordSum
+        - Data.Aeson.Deriving.SingleFieldObject
