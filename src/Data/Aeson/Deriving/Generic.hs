@@ -32,6 +32,8 @@ module Data.Aeson.Deriving.Generic
   , ObjectWithSingleField
   , TwoElemArray
   , TaggedObject
+  -- ** Safety class
+  , LoopWarning
   --  ** Utilities
   , snakeCase
   , dropLowercasePrefix
@@ -42,7 +44,7 @@ import           Data.Char (toLower, toUpper, isUpper)
 import           Data.Kind (Type, Constraint)
 import           Data.Proxy (Proxy(..))
 import           GHC.Generics
-import           GHC.TypeLits (KnownSymbol, Symbol, symbolVal)
+import           GHC.TypeLits
 
 -- | Specify your encoding scheme in terms of aeson's out-of-the box Generic
 --   functionality. This type is never used directly, only "coerced through".
@@ -69,6 +71,19 @@ instance
 -- | For specifying 'Options' record for Aeson's Generic deriving support
 class ToAesonOptions a where
   toAesonOptions :: Proxy a -> Options
+
+-- | Used in FromJSON/ToJSON superclass constraints for newtypes that recursively modify
+--   the instances. A guard against the common mistake of deriving encoders in terms
+--   of such a newtype over the naked base type instead of the 'GenericEncoded' version.
+type family LoopWarning a :: Constraint where
+  LoopWarning (GenericEncoded opts a) = ()
+  LoopWarning (f x) = LoopWarning x
+  LoopWarning x = TypeError
+    ( 'Text "Uh oh! Watch out for those infinite loops!"
+    ':$$: 'Text "Derive aeson classes based on the `GenericEncoded` newtype only."
+    ':$$: 'Text "Instead your type is based directly on:  " ':<>: 'ShowType x
+    ':$$: 'Text "You probably created an infinitely recursive encoder/decoder pair."
+    )
 
 
 ------------------------------------------------------------------------------------------
