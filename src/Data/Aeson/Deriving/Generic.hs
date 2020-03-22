@@ -203,15 +203,31 @@ instance
 -- | Used in FromJSON/ToJSON superclass constraints for newtypes that recursively modify
 --   the instances. A guard against the common mistake of deriving encoders in terms
 --   of such a newtype over the naked base type instead of the 'GenericEncoded' version.
-type family LoopWarning a :: Constraint where
-  LoopWarning (GenericEncoded opts a) = ()
-  LoopWarning (RecordSumEncoded tagKey tagValMod a) = ()
-  LoopWarning (f x) = LoopWarning x
-  LoopWarning x = TypeError
+--   This can lead to nasty runtime bugs.
+--
+--   This measure does limit prohibit some legitimate uses, although most of them should
+--   be covered by this library's functionality. Please consider raising an issue if this
+--   ever poses a real problem for you.
+--
+--   For this reason, this type error message may be removed in the future.
+type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
+  LoopWarning n (GenericEncoded opts a) = ()
+  LoopWarning n (RecordSumEncoded tagKey tagValMod a) = ()
+  LoopWarning n (f x) = LoopWarning n x
+  LoopWarning n x = TypeError
     ( 'Text "Uh oh! Watch out for those infinite loops!"
-    ':$$: 'Text "Derive aeson classes based on the `GenericEncoded` newtype only."
-    ':$$: 'Text "Instead your type is based directly on:  " ':<>: 'ShowType x
+    ':$$: 'Text "Newtypes that recursively modify aeson instances, namely:"
+    ':$$: 'Text ""
+    ':$$: 'Text "  " ':<>: 'ShowType n
+    ':$$: 'Text ""
+    ':$$: 'Text "must only be used atop a type that creates the instances non-recursively: "
+    ':$$: 'Text ""
+    ':$$: 'Text "  ￮ GenericEncoded"
+    ':$$: 'Text "  ￮ RecordSumEncoded"
+    ':$$: 'Text ""
     ':$$: 'Text "You probably created an infinitely recursive encoder/decoder pair."
+    ':$$: 'Text "See `Data.Aeson.Deriving.Generic.LoopWarning` for details."
+    ':$$: 'Text ""
     )
 
 
