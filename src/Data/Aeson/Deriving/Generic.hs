@@ -3,16 +3,22 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Aeson.Deriving.Generic
-  ( -- ** Main typeclass
+  ( -- * Typeclass for aeson 'Options'
     ToAesonOptions(..)
- -- ** Main data types for generics-based encodings
+  -- * newtypes for Generic encodings
+  -- ** Main data type for Generic encodings
   , GenericEncoded(..)
+  -- ** Data type for encodings of composite "sum-of-records" types
   , RecordSumEncoded(..)
-  -- **** Helper data type for Options definitions
+  -- * Phantom types for specifying Options
+  -- ** Many-parameter type for explicitly providing all 'Options' fields.
   , GenericOptions
-  -- ** Fields of Aeson Options
-  , ToAesonOptionsField
+  -- ** Types for supplying specific Options fields
+  -- *** Type representing field assignment
   , (:=)
+  -- *** Typeclass for Options fields
+  , ToAesonOptionsField
+  -- *** Types representing Options fields
   , FieldLabelModifier
   , ConstructorTagModifier
   , AllNullaryToStringTag
@@ -20,24 +26,23 @@ module Data.Aeson.Deriving.Generic
   , SumEncoding  -- technically an aeson reexport. Shouldn't matter.
   , UnwrapUnaryRecords
   , TagSingleConstructors
-  --  **** String Functions
+  --  *** String Functions
   , StringFunction(..)
   , SnakeCase
   , Uppercase
   , Lowercase
   , DropLowercasePrefix
   , Id
-  --  **** Sum encoding options
+  , snakeCase
+  , dropLowercasePrefix
+  --  *** Sum encoding options
   , ToSumEncoding
   , UntaggedValue
   , ObjectWithSingleField
   , TwoElemArray
   , TaggedObject
-  -- ** Safety class
+  -- * Safety class
   , LoopWarning
-  --  ** Utilities
-  , snakeCase
-  , dropLowercasePrefix
   ) where
 
 import           Data.Aeson
@@ -52,6 +57,127 @@ import           Data.Proxy                             (Proxy (..))
 import           Data.Text                              (pack)
 import           GHC.Generics
 import           GHC.TypeLits
+
+
+------------------------------------------------------------------------------------------
+-- Main class
+------------------------------------------------------------------------------------------
+
+-- | A class for defining 'Options' for Aeson's Generic deriving support.
+--   It is generally instantiated either by specifying all 'Options' fields, using
+--   'GenericOptions', or simply be overriding a few specific fields, by giving a
+--   (type-level) list. In both cases, for the sake of explicitness and to reduce the
+--   possibility of mistakes, fields are specified in a record-like form using the
+--   '(:=)' data type.
+--
+--   Users may also provide their own instances for their own data types if desired,
+--   but this should not generally be necessary.
+class ToAesonOptions a where
+  toAesonOptions :: Proxy a -> Options
+
+
+------------------------------------------------------------------------------------------
+-- Data types for aeson Options fields
+------------------------------------------------------------------------------------------
+
+-- | Phantom data type to make explicit which fields we pass for Aeson options. Polykinded
+--   in the second argument so it can take i.e. Booleans or Symbols where needed.
+--
+--   Also used for specifying constant values added to, or required from, an encoding.
+--   See "Data.Aeson.Deriving.WithConstantFields".
+data field := (value :: k)
+
+instance ToAesonOptions '[] where toAesonOptions Proxy = defaultOptions
+instance (ToAesonOptionsField x, ToAesonOptions xs) => ToAesonOptions (x ': xs) where
+  toAesonOptions Proxy =
+    let
+      patch = toAesonOptionsField (Proxy @x)
+      opts = toAesonOptions (Proxy @xs)
+    in
+      patch $ defaultOptions
+        { fieldLabelModifier = fieldLabelModifier opts
+        , constructorTagModifier = constructorTagModifier opts
+        , allNullaryToStringTag = allNullaryToStringTag opts
+        , omitNothingFields = omitNothingFields opts
+        , sumEncoding = sumEncoding opts
+        , unwrapUnaryRecords = unwrapUnaryRecords opts
+        , tagSingleConstructors = tagSingleConstructors opts
+        }
+
+
+-- | A class that knows about fields of aeson's 'Options'.
+class ToAesonOptionsField x where
+  toAesonOptionsField :: Proxy x -> Options -> Options
+
+data FieldLabelModifier
+data ConstructorTagModifier
+data AllNullaryToStringTag
+data OmitNothingFields
+-- data SumEncoding -- data type name exists in aeson
+data UnwrapUnaryRecords
+data TagSingleConstructors
+
+instance StringFunction f => ToAesonOptionsField (FieldLabelModifier := f) where
+    toAesonOptionsField Proxy opts = opts {fieldLabelModifier = stringFunction $ Proxy @f}
+instance StringFunction f => ToAesonOptionsField (ConstructorTagModifier := f) where
+    toAesonOptionsField Proxy opts = opts {constructorTagModifier = stringFunction $ Proxy @f}
+instance Boolean b => ToAesonOptionsField (AllNullaryToStringTag := b) where
+    toAesonOptionsField Proxy opts = opts {allNullaryToStringTag = boolVal $ Proxy @b}
+instance Boolean b => ToAesonOptionsField (OmitNothingFields := b) where
+    toAesonOptionsField Proxy opts = opts {omitNothingFields = boolVal $ Proxy @b}
+instance ToSumEncoding se => ToAesonOptionsField (SumEncoding := se) where
+    toAesonOptionsField Proxy opts = opts {sumEncoding = toSumEncoding $ Proxy @se}
+instance Boolean b => ToAesonOptionsField (UnwrapUnaryRecords := b) where
+    toAesonOptionsField Proxy opts = opts {unwrapUnaryRecords = boolVal $ Proxy @b}
+instance Boolean b => ToAesonOptionsField (TagSingleConstructors := b) where
+    toAesonOptionsField Proxy opts = opts {tagSingleConstructors = boolVal $ Proxy @b}
+
+
+------------------------------------------------------------------------------------------
+-- A Single type for all Options fields
+------------------------------------------------------------------------------------------
+
+-- | Type-level representation of the Aeson Generic deriving 'Options'.
+--   This representation is useful explicitly setting all options.
+data GenericOptions
+  :: fieldLabelModifier
+  -> constructorTagModifier
+  -> allNullaryToStringTag
+  -> omitNothingFields
+  -> sumEncoding
+  -> unwrapUnaryRecords
+  -> tagSingleConstructors
+  -> Type
+
+instance
+  ( All StringFunction [fieldLabelModifier, constructorTagModifier]
+  , ToSumEncoding sumEncoding
+  , All Boolean
+     [ allNullaryToStringTag
+     , omitNothingFields
+     , unwrapUnaryRecords
+     , tagSingleConstructors
+     ]
+  ) => ToAesonOptions
+    (GenericOptions
+      (FieldLabelModifier := fieldLabelModifier)
+      (ConstructorTagModifier := constructorTagModifier)
+      (AllNullaryToStringTag := allNullaryToStringTag)
+      (OmitNothingFields := omitNothingFields)
+      (SumEncoding := sumEncoding)
+      (UnwrapUnaryRecords := unwrapUnaryRecords)
+      (TagSingleConstructors := tagSingleConstructors)) where
+  toAesonOptions _           = defaultOptions
+    { fieldLabelModifier     = stringFunction $ Proxy @fieldLabelModifier
+    , constructorTagModifier = stringFunction $ Proxy @constructorTagModifier
+    , allNullaryToStringTag  = boolVal $ Proxy @allNullaryToStringTag
+    , omitNothingFields      = boolVal $ Proxy @omitNothingFields
+    , sumEncoding            = toSumEncoding $ Proxy @sumEncoding
+    , unwrapUnaryRecords     = boolVal $ Proxy @unwrapUnaryRecords
+    , tagSingleConstructors  = boolVal $ Proxy @tagSingleConstructors
+    }
+
+
 
 -- | Specify your encoding scheme in terms of aeson's out-of-the box Generic
 --   functionality. This type is never used directly, only "coerced through".
@@ -73,11 +199,6 @@ instance
     => ToJSON (GenericEncoded opts a) where
       toJSON (GenericEncoded x)
         = genericToJSON (toAesonOptions (Proxy @opts)) x
-
-
--- | For specifying 'Options' record for Aeson's Generic deriving support
-class ToAesonOptions a where
-  toAesonOptions :: Proxy a -> Options
 
 -- | Used in FromJSON/ToJSON superclass constraints for newtypes that recursively modify
 --   the instances. A guard against the common mistake of deriving encoders in terms
@@ -154,60 +275,6 @@ instance
     => ToJSON (RecordSumEncoded tagKey tagModifier a) where
       toJSON (RecordSumEncoded x) =
         toJSON $ GenericEncoded @'[SumEncoding := UntaggedValue] x
-
-
-------------------------------------------------------------------------------------------
--- Aeson Options fields
-------------------------------------------------------------------------------------------
-
--- | A class that knows about fields of aeson's 'Options'.
-class ToAesonOptionsField x where
-  toAesonOptionsField :: Proxy x -> Options -> Options
-
--- | Empty data type to make explicit which types we pass for Aeson options
---   Polykinded in the second argument so it can take i.e. Booleans where needed.
-data a := (b :: k)
-
-data FieldLabelModifier
-data ConstructorTagModifier
-data AllNullaryToStringTag
-data OmitNothingFields
--- data SumEncoding -- data type name exists in aeson
-data UnwrapUnaryRecords
-data TagSingleConstructors
-
-instance StringFunction f => ToAesonOptionsField (FieldLabelModifier := f) where
-    toAesonOptionsField Proxy opts = opts {fieldLabelModifier = stringFunction $ Proxy @f}
-instance StringFunction f => ToAesonOptionsField (ConstructorTagModifier := f) where
-    toAesonOptionsField Proxy opts = opts {constructorTagModifier = stringFunction $ Proxy @f}
-instance Boolean b => ToAesonOptionsField (AllNullaryToStringTag := b) where
-    toAesonOptionsField Proxy opts = opts {allNullaryToStringTag = boolVal $ Proxy @b}
-instance Boolean b => ToAesonOptionsField (OmitNothingFields := b) where
-    toAesonOptionsField Proxy opts = opts {omitNothingFields = boolVal $ Proxy @b}
-instance ToSumEncoding se => ToAesonOptionsField (SumEncoding := se) where
-    toAesonOptionsField Proxy opts = opts {sumEncoding = toSumEncoding $ Proxy @se}
-instance Boolean b => ToAesonOptionsField (UnwrapUnaryRecords := b) where
-    toAesonOptionsField Proxy opts = opts {unwrapUnaryRecords = boolVal $ Proxy @b}
-instance Boolean b => ToAesonOptionsField (TagSingleConstructors := b) where
-    toAesonOptionsField Proxy opts = opts {tagSingleConstructors = boolVal $ Proxy @b}
-
-
-instance ToAesonOptions '[] where toAesonOptions Proxy = defaultOptions
-instance (ToAesonOptionsField x, ToAesonOptions xs) => ToAesonOptions (x ': xs) where
-  toAesonOptions Proxy =
-    let
-      patch = toAesonOptionsField (Proxy @x)
-      opts = toAesonOptions (Proxy @xs)
-    in
-      patch $ defaultOptions
-        { fieldLabelModifier = fieldLabelModifier opts
-        , constructorTagModifier = constructorTagModifier opts
-        , allNullaryToStringTag = allNullaryToStringTag opts
-        , omitNothingFields = omitNothingFields opts
-        , sumEncoding = sumEncoding opts
-        , unwrapUnaryRecords = unwrapUnaryRecords opts
-        , tagSingleConstructors = tagSingleConstructors opts
-        }
 
 
 ------------------------------------------------------------------------------------------
@@ -303,48 +370,3 @@ dropLowercasePrefix [] = []
 dropLowercasePrefix (x:xs)
   | isUpper x = x : xs
   | otherwise = dropLowercasePrefix xs
-
-
-------------------------------------------------------------------------------------------
--- A Single type for all Options fields
-------------------------------------------------------------------------------------------
-
--- | Type-level representation of the Aeson Generic deriving 'Options'.
---   This representation is useful explicitly setting all options.
-data GenericOptions
-  :: fieldLabelModifier
-  -> constructorTagModifier
-  -> allNullaryToStringTag
-  -> omitNothingFields
-  -> sumEncoding
-  -> unwrapUnaryRecords
-  -> tagSingleConstructors
-  -> Type
-
-instance
-  ( All StringFunction [fieldLabelModifier, constructorTagModifier]
-  , ToSumEncoding sumEncoding
-  , All Boolean
-     [ allNullaryToStringTag
-     , omitNothingFields
-     , unwrapUnaryRecords
-     , tagSingleConstructors
-     ]
-  ) => ToAesonOptions
-    (GenericOptions
-      (FieldLabelModifier := fieldLabelModifier)
-      (ConstructorTagModifier := constructorTagModifier)
-      (AllNullaryToStringTag := allNullaryToStringTag)
-      (OmitNothingFields := omitNothingFields)
-      (SumEncoding := sumEncoding)
-      (UnwrapUnaryRecords := unwrapUnaryRecords)
-      (TagSingleConstructors := tagSingleConstructors)) where
-  toAesonOptions _           = defaultOptions
-    { fieldLabelModifier     = stringFunction $ Proxy @fieldLabelModifier
-    , constructorTagModifier = stringFunction $ Proxy @constructorTagModifier
-    , allNullaryToStringTag  = boolVal $ Proxy @allNullaryToStringTag
-    , omitNothingFields      = boolVal $ Proxy @omitNothingFields
-    , sumEncoding            = toSumEncoding $ Proxy @sumEncoding
-    , unwrapUnaryRecords     = boolVal $ Proxy @unwrapUnaryRecords
-    , tagSingleConstructors  = boolVal $ Proxy @tagSingleConstructors
-    }
