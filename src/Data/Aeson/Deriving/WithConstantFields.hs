@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -13,9 +14,24 @@ import qualified Data.HashMap.Strict as HashMap
 import Data.Proxy
 import Control.Monad
 
--- | Add arbitrary constant fields to the encoded object
+-- | Add arbitrary constant fields to the encoded object and require them when decoding.
 newtype WithConstantFields (obj :: k) (a :: Type) = WithConstantFields a
   deriving stock (Generic)
+
+-- | Add arbitrary constant fields to the encoded object, but do not require them when
+--   decoding.
+newtype WithConstantFieldsOut (obj :: k) (a :: Type) = WithConstantFieldsOut a
+  deriving stock (Generic)
+  deriving ToJSON via (WithConstantFields obj a)
+  deriving FromJSON via a
+
+-- | Require arbitrary constant fields when decoding the object, but do not add them when
+--   encoding.
+newtype WithConstantFieldsIn (obj :: k) (a :: Type) = WithConstantFieldsIn a
+  deriving stock (Generic)
+  deriving ToJSON via a
+  deriving FromJSON via (WithConstantFields obj a)
+
 
 class ToConstant (a :: k) where
   toConstant :: Proxy a -> Value

@@ -2,6 +2,7 @@
 {-# Language DataKinds #-}
 {-# Language TemplateHaskell #-}
 {-# Language DeriveAnyClass #-}
+{-# Language DuplicateRecordFields #-}
 
 module Main where
 
@@ -83,15 +84,54 @@ data X = X {xval :: Int}
       '["bar" := "baaz", "quux" := MyVal]
       (GenericEncoded '[] X)
 
-prop_constant_fields_encode_as_expected :: Property
-prop_constant_fields_encode_as_expected = once . property $
+prop_WithConstantFields_extra_fields_encode_as_expected :: Property
+prop_WithConstantFields_extra_fields_encode_as_expected = once . property $
   encode (X 9)
     === "{\"xval\":9,\"quux\":1,\"bar\":\"baaz\"}"
 
-prop_constant_fields_decode_as_expected :: Property
-prop_constant_fields_decode_as_expected = once . property $
+prop_WithConstantFields_extra_fields_decode_as_expected :: Property
+prop_WithConstantFields_extra_fields_decode_as_expected = once . property $
   tripping (X 9) encode decode
 
+prop_WithConstantFields_extra_fields_required_when_decoding :: Property
+prop_WithConstantFields_extra_fields_required_when_decoding = once . property $
+  decode @X "{\"xval\":9}" === Nothing
+
+data X2 = X2 {xval :: Int}
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via
+    WithConstantFieldsOut
+      '["bar" := "baaz", "quux" := "axion"]
+      (GenericEncoded '[] X2)
+
+prop_WithConstantFieldsOut_encodes_as_expected :: Property
+prop_WithConstantFieldsOut_encodes_as_expected = once . property $
+  encode (X2 9)
+    === "{\"xval\":9,\"quux\":\"axion\",\"bar\":\"baaz\"}"
+
+prop_WithConstantFieldsOut_extra_fields_not_required_when_decoding :: Property
+prop_WithConstantFieldsOut_extra_fields_not_required_when_decoding = once . property $
+  decode @X2 "{\"xval\":9}" === Just (X2 9)
+
+data X3 = X3 {xval :: Int}
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via
+    WithConstantFieldsIn
+      '["bar" := "baaz", "quux" := "axion"]
+      (GenericEncoded '[] X3)
+
+prop_WithConstantFieldsIn_encodes_as_expected :: Property
+prop_WithConstantFieldsIn_encodes_as_expected = once . property $
+  encode (X3 13)
+    === "{\"xval\":13}"
+
+prop_WithConstantFieldsIn_decodes_as_expected :: Property
+prop_WithConstantFieldsIn_decodes_as_expected = once . property $
+  decode @X3 "{\"xval\":9,\"quux\":\"axion\",\"bar\":\"baaz\"}" === Just (X3 9)
+
+prop_WithConstantFieldsIn_extra_fields_required_when_decoding :: Property
+prop_WithConstantFieldsIn_extra_fields_required_when_decoding = once . property $
+  decode @X3 "{\"xval\":9}" === Nothing
 
 data Y = Y {yval :: Int}
   deriving stock (Generic, Show, Eq)
