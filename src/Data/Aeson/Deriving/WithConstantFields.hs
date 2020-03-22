@@ -37,16 +37,17 @@ instance (ToConstantObject fields, KnownSymbol key, ToConstant val)
         (toConstant $ Proxy @val)
         (toConstantObject $ Proxy @fields)
 
-instance (ToJSON a, LoopWarning a, ToConstantObject obj) => ToJSON (WithConstantFields obj a) where
-  toJSON (WithConstantFields x) = mapObjects (<> fields) $ toJSON x
-    where
-      fields = toConstantObject $ Proxy @obj
+instance (ToJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject obj) =>
+  ToJSON (WithConstantFields obj a) where
+    toJSON (WithConstantFields x) = mapObjects (<> fields) $ toJSON x
+      where
+        fields = toConstantObject $ Proxy @obj
 
-      mapObjects :: (Object -> Object) -> Value -> Value
-      mapObjects f (Object o) = Object (f o)
-      mapObjects _ val        = val
+        mapObjects :: (Object -> Object) -> Value -> Value
+        mapObjects f (Object o) = Object (f o)
+        mapObjects _ val        = val
 
-instance (FromJSON a, LoopWarning a, ToConstantObject obj) => FromJSON (WithConstantFields obj a) where
+instance (FromJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject obj) => FromJSON (WithConstantFields obj a) where
   parseJSON valIn = WithConstantFields <$>
     parseJSON valIn <*
       HashMap.traverseWithKey assertFieldPresent (toConstantObject $ Proxy @obj)
