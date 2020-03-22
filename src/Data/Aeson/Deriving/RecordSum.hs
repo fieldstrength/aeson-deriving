@@ -65,7 +65,7 @@ instance
           ParserMap parserMap
             = unsafeMapKeys (stringFunction $ Proxy @tagModifier)
             . gParserMap
-            $ Proxy @(Rep a ())
+            $ Proxy @(Rep a)
           backticks str = "`" <> str <> "`"
           prependErrMsg str = modifyFailure (str <>)
           outerErrorMsg = "Failed to parse a " <> datatypeName @meta undefined <> ": "
