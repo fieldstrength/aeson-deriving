@@ -5,6 +5,7 @@
 module Data.Aeson.Deriving.WithConstantFields where
 
 import Data.Aeson
+import Data.Aeson.Deriving.Internal.Utils
 import Data.Aeson.Deriving.Generic
 import Data.Kind (Type)
 import Data.Text (pack)
@@ -58,10 +59,6 @@ instance (ToJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject obj
     toJSON (WithConstantFields x) = mapObjects (<> fields) $ toJSON x
       where
         fields = toConstantObject $ Proxy @obj
-
-        mapObjects :: (Object -> Object) -> Value -> Value
-        mapObjects f (Object o) = Object (f o)
-        mapObjects _ val        = val
 
 instance (FromJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject obj) => FromJSON (WithConstantFields obj a) where
   parseJSON valIn = WithConstantFields <$>
