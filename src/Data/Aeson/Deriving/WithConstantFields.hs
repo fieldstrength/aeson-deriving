@@ -72,3 +72,28 @@ instance (FromJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject o
           unless (valActual == valExpected) . fail $
             "Expected constant value `" <> show valExpected <> "` but got: " <>
             show valActual
+
+-- | Represents a function that maps the first value to the second,
+--   and otherwise does nothing but return the input.
+data a ==> b
+
+class Function (a :: Type) where
+  function :: Proxy a -> Value -> Value
+
+instance All ToConstant [a, b] => Function (a ==> b) where
+  function _ x
+    | x == toConstant (Proxy @a) = toConstant (Proxy @b)
+    | otherwise = x
+
+instance All KnownSymbol [a, b] => StringFunction (a ==> b) where
+  stringFunction _ x
+    | x == symbolVal (Proxy @a) = symbolVal (Proxy @b)
+    | otherwise = x
+
+-- | Function that turns null supplies a default value for a
+data WithDefault (val :: k)
+
+instance ToConstant a => Function (WithDefault a) where
+  function Proxy = \case
+    Null -> toConstant $ Proxy @a
+    x    -> x
