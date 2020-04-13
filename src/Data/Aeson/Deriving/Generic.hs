@@ -47,6 +47,7 @@ module Data.Aeson.Deriving.Generic
 
 import           Data.Aeson
 import           Data.Aeson.Deriving.RecordSum.Internal
+import           Data.Aeson.Deriving.Utils
 import           Data.Aeson.Types                       (modifyFailure)
 import           Data.Char                              (isUpper, toLower, toUpper)
 import           Data.Function                          ((&))
@@ -366,11 +367,6 @@ instance (KnownSymbol tag, KnownSymbol contents) => ToSumEncoding (TaggedObject 
 ------------------------------------------------------------------------------------------
 -- Utilities
 ------------------------------------------------------------------------------------------
-
-type family All (c :: k -> Constraint) (cs :: [k]) :: Constraint where
-  All c '[] = ()
-  All c (x ': xs) = (c x, All c xs)
-
 
 -- | Field name modifier function that separates camel-case words by underscores
 --   (i.e. on capital letters). Also knows to handle a consecutive sequence of

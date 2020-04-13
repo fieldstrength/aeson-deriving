@@ -81,13 +81,13 @@ data X = X {xval :: Int}
   deriving stock (Generic, Show, Eq)
   deriving (FromJSON, ToJSON) via
     WithConstantFields
-      '["bar" := "baaz", "quux" := MyVal]
+      '["bar" := "baaz", "quux" := MyVal, "arr" := ["Hilbert","Dirac"]]
       (GenericEncoded '[] X)
 
 prop_WithConstantFields_extra_fields_encode_as_expected :: Property
 prop_WithConstantFields_extra_fields_encode_as_expected = once . property $
   encode (X 9)
-    === "{\"xval\":9,\"quux\":1,\"bar\":\"baaz\"}"
+    === "{\"xval\":9,\"arr\":[\"Hilbert\",\"Dirac\"],\"quux\":1,\"bar\":\"baaz\"}"
 
 prop_WithConstantFields_extra_fields_decode_as_expected :: Property
 prop_WithConstantFields_extra_fields_decode_as_expected = once . property $
