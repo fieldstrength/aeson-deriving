@@ -6,7 +6,7 @@ module Data.Aeson.Deriving.WithConstantFields where
 
 import Data.Aeson
 import Data.Aeson.Deriving.Utils
-import Data.Aeson.Deriving.Values
+import Data.Aeson.Deriving.Known
 import Data.Aeson.Deriving.Generic
 import Data.Kind (Type)
 import GHC.Generics
@@ -33,16 +33,16 @@ newtype WithConstantFieldsIn (obj :: k) (a :: Type) = WithConstantFieldsIn a
   deriving FromJSON via (WithConstantFields obj a)
 
 
-instance (ToJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject obj) =>
+instance (ToJSON a, LoopWarning (WithConstantFields obj) a, KnownJSONObject obj) =>
   ToJSON (WithConstantFields obj a) where
     toJSON (WithConstantFields x) = mapObjects (<> fields) $ toJSON x
       where
-        fields = toConstantObject $ Proxy @obj
+        fields = objectVal $ Proxy @obj
 
-instance (FromJSON a, LoopWarning (WithConstantFields obj) a, ToConstantObject obj) => FromJSON (WithConstantFields obj a) where
+instance (FromJSON a, LoopWarning (WithConstantFields obj) a, KnownJSONObject obj) => FromJSON (WithConstantFields obj a) where
   parseJSON valIn = WithConstantFields <$>
     parseJSON valIn <*
-      HashMap.traverseWithKey assertFieldPresent (toConstantObject $ Proxy @obj)
+      HashMap.traverseWithKey assertFieldPresent (objectVal $ Proxy @obj)
 
     where
       assertFieldPresent key valExpected =

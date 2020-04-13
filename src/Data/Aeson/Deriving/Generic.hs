@@ -46,6 +46,7 @@ module Data.Aeson.Deriving.Generic
   ) where
 
 import           Data.Aeson
+import           Data.Aeson.Deriving.Known
 import           Data.Aeson.Deriving.RecordSum.Internal
 import           Data.Aeson.Deriving.Utils
 import           Data.Aeson.Types                       (modifyFailure)
@@ -76,17 +77,6 @@ import           GHC.TypeLits
 class ToAesonOptions a where
   toAesonOptions :: Proxy a -> Options
 
-
-------------------------------------------------------------------------------------------
--- Data types for aeson Options fields
-------------------------------------------------------------------------------------------
-
--- | Phantom data type to make explicit which fields we pass for Aeson options. Polykinded
---   in the second argument so it can take i.e. Booleans or Symbols where needed.
---
---   Also used for specifying constant values added to, or required from, an encoding.
---   See "Data.Aeson.Deriving.WithConstantFields".
-data field := (value :: k)
 
 instance ToAesonOptions '[] where toAesonOptions Proxy = defaultOptions
 instance (ToAesonOptionsField x, ToAesonOptions xs) => ToAesonOptions (x ': xs) where
@@ -122,15 +112,15 @@ instance StringFunction f => ToAesonOptionsField (FieldLabelModifier := f) where
     toAesonOptionsField Proxy opts = opts {fieldLabelModifier = stringFunction $ Proxy @f}
 instance StringFunction f => ToAesonOptionsField (ConstructorTagModifier := f) where
     toAesonOptionsField Proxy opts = opts {constructorTagModifier = stringFunction $ Proxy @f}
-instance Boolean b => ToAesonOptionsField (AllNullaryToStringTag := b) where
+instance KnownBool b => ToAesonOptionsField (AllNullaryToStringTag := b) where
     toAesonOptionsField Proxy opts = opts {allNullaryToStringTag = boolVal $ Proxy @b}
-instance Boolean b => ToAesonOptionsField (OmitNothingFields := b) where
+instance KnownBool b => ToAesonOptionsField (OmitNothingFields := b) where
     toAesonOptionsField Proxy opts = opts {omitNothingFields = boolVal $ Proxy @b}
 instance ToSumEncoding se => ToAesonOptionsField (SumEncoding := se) where
     toAesonOptionsField Proxy opts = opts {sumEncoding = toSumEncoding $ Proxy @se}
-instance Boolean b => ToAesonOptionsField (UnwrapUnaryRecords := b) where
+instance KnownBool b => ToAesonOptionsField (UnwrapUnaryRecords := b) where
     toAesonOptionsField Proxy opts = opts {unwrapUnaryRecords = boolVal $ Proxy @b}
-instance Boolean b => ToAesonOptionsField (TagSingleConstructors := b) where
+instance KnownBool b => ToAesonOptionsField (TagSingleConstructors := b) where
     toAesonOptionsField Proxy opts = opts {tagSingleConstructors = boolVal $ Proxy @b}
 
 
@@ -153,7 +143,7 @@ data GenericOptions
 instance
   ( All StringFunction [fieldLabelModifier, constructorTagModifier]
   , ToSumEncoding sumEncoding
-  , All Boolean
+  , All KnownBool
      [ allNullaryToStringTag
      , omitNothingFields
      , unwrapUnaryRecords
@@ -294,16 +284,6 @@ instance
         toJSON $ GenericEncoded @'[SumEncoding := UntaggedValue] x
 
 
-------------------------------------------------------------------------------------------
--- Booleans
-------------------------------------------------------------------------------------------
-
-class Boolean (b :: Bool) where
-  boolVal :: Proxy b -> Bool
-
-instance Boolean 'True where boolVal _ = True
-instance Boolean 'False where boolVal _ = False
-
 
 ------------------------------------------------------------------------------------------
 -- String functions
@@ -330,6 +310,10 @@ instance StringFunction '[] where stringFunction _ = id
 instance (StringFunction x, StringFunction xs) => StringFunction (x ': xs) where
     stringFunction Proxy = stringFunction (Proxy @x) . stringFunction (Proxy @xs)
 
+instance All KnownSymbol [a, b] => StringFunction (a ==> b) where
+  stringFunction Proxy x
+    | x == symbolVal (Proxy @a) = symbolVal (Proxy @b)
+    | otherwise = x
 
 ------------------------------------------------------------------------------------------
 -- Sum type encodings

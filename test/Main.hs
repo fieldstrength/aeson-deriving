@@ -75,7 +75,7 @@ prop_record_sum_decodes_as_expected = once . property $
 
 
 data MyVal
-instance ToConstant MyVal where toConstant _ = Number 1
+instance KnownJSON MyVal where jsonVal _ = Number 1
 
 data X = X {xval :: Int}
   deriving stock (Generic, Show, Eq)

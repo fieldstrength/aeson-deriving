@@ -66,6 +66,7 @@ library:
     exposed-modules:
         - Data.Aeson.Deriving
         - Data.Aeson.Deriving.Generic
+        - Data.Aeson.Deriving.Known
         - Data.Aeson.Deriving.SingleFieldObject
         - Data.Aeson.Deriving.Utils
         - Data.Aeson.Deriving.WithConstantFields
