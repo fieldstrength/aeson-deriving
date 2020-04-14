@@ -4,7 +4,6 @@
 module Data.Aeson.Deriving.Known where
 
 import Data.Aeson
-import Data.Aeson.Deriving.Utils
 import Data.Kind (Type)
 import Data.Text (pack)
 import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
@@ -81,7 +80,8 @@ class KnownJSONFunction (a :: Type) where
 --   and otherwise does nothing but return the input.
 data a ==> b
 
-instance All KnownJSON [a, b] => KnownJSONFunction (a ==> b) where
+-- instance All KnownJSON [a, b] => KnownJSONFunction (a ==> b) where
+instance (KnownJSON a, KnownJSON b) => KnownJSONFunction (a ==> b) where
   functionVal Proxy x
     | x == jsonVal (Proxy @a) = jsonVal (Proxy @b)
     | otherwise = x
