@@ -146,3 +146,20 @@ prop_single_field_objects_encode_as_expected = once . property $
 prop_single_field_objects_decode_as_expected :: Property
 prop_single_field_objects_decode_as_expected = once . property $
   tripping (Y 7) encode decode
+
+data Z = Z {zval :: String}
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via
+    RemapTextField "zval" "bad" "good" (GenericEncoded '[] Z)
+
+remapped_text_fields_encode_as_expected :: Property
+remapped_text_fields_encode_as_expected = once . property $ do
+  encode (Z "bad") === "{\"zval\":\"good\"}"
+  encode (Z "cat") === "{\"zval\":\"cat\"}"
+
+remapped_text_fields_decode_as_expected :: Property
+remapped_text_fields_decode_as_expected = once . property $ do
+  tripping (Z "bad") encode decode
+  tripping (Z "cat") encode decode
+  Just (Z "bad") === decode "{\"zval\":\"good\"}"
+  Just (Z "cat") === decode "{\"zval\":\"cat\"}"

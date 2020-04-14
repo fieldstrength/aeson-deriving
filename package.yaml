@@ -27,6 +27,7 @@ default-extensions:
     - GeneralizedNewtypeDeriving
     - KindSignatures
     - LambdaCase
+    - MultiParamTypeClasses
     - NamedFieldPuns
     - OverloadedStrings
     - ScopedTypeVariables
@@ -67,6 +68,7 @@ library:
         - Data.Aeson.Deriving
         - Data.Aeson.Deriving.Generic
         - Data.Aeson.Deriving.Known
+        - Data.Aeson.Deriving.ModifyField
         - Data.Aeson.Deriving.SingleFieldObject
         - Data.Aeson.Deriving.Utils
         - Data.Aeson.Deriving.WithConstantFields
