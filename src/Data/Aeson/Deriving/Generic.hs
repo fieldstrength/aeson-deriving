@@ -207,6 +207,7 @@ instance
 type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
   LoopWarning n (GenericEncoded opts a) = ()
   LoopWarning n (RecordSumEncoded tagKey tagValMod a) = ()
+  LoopWarning n (DisableLoopWarning a) = ()
   LoopWarning n (x & f) = LoopWarning n (f x)
   LoopWarning n (f x) = LoopWarning n x
   LoopWarning n x = TypeError
@@ -225,10 +226,14 @@ type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
     ':$$: 'Text "  " ':<>: 'ShowType x
     ':$$: 'Text ""
     ':$$: 'Text "You probably created an infinitely recursive encoder/decoder pair."
-    ':$$: 'Text "See the definition `Data.Aeson.Deriving.Generic.LoopWarning` for details."
+    ':$$: 'Text "See `LoopWarning` for details."
+    ':$$: 'Text "This check can be disabled by wrapping the inner type in `DisableLoopWarning`."
     ':$$: 'Text ""
     )
 
+-- | Assert that you know what you're doing and to nullify the 'LoopWarning' constraint family.
+newtype DisableLoopWarning a = DisableLoopWarning a
+  deriving newtype (FromJSON, ToJSON)
 
 ------------------------------------------------------------------------------------------
 -- Sums over records
