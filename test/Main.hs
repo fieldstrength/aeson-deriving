@@ -80,9 +80,10 @@ instance KnownJSON MyVal where jsonVal _ = Number 1
 data X = X {xval :: Int}
   deriving stock (Generic, Show, Eq)
   deriving (FromJSON, ToJSON) via
-    WithConstantFields
-      '["bar" := "baaz", "quux" := MyVal, "arr" := ["Hilbert","Dirac"]]
-      (GenericEncoded '[] X)
+    X
+      & GenericEncoded '[]
+      & WithConstantFields
+          '["bar" := "baaz", "quux" := MyVal, "arr" := ["Hilbert","Dirac"]]
 
 prop_WithConstantFields_extra_fields_encode_as_expected :: Property
 prop_WithConstantFields_extra_fields_encode_as_expected = once . property $

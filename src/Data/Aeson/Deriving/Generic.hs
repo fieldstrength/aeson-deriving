@@ -43,6 +43,9 @@ module Data.Aeson.Deriving.Generic
   , TaggedObject
   -- * Safety class
   , LoopWarning
+  -- * Convenience newtype
+  , type (&) (Ampersand)
+  , unAmpersand
   ) where
 
 import           Data.Aeson
@@ -204,6 +207,7 @@ instance
 type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
   LoopWarning n (GenericEncoded opts a) = ()
   LoopWarning n (RecordSumEncoded tagKey tagValMod a) = ()
+  LoopWarning n (x & f) = LoopWarning n (f x)
   LoopWarning n (f x) = LoopWarning n x
   LoopWarning n x = TypeError
     ( 'Text "Uh oh! Watch out for those infinite loops!"
@@ -216,8 +220,12 @@ type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
     ':$$: 'Text "  ￮ GenericEncoded"
     ':$$: 'Text "  ￮ RecordSumEncoded"
     ':$$: 'Text ""
+    ':$$: 'Text "We observe instead the inner type: "
+    ':$$: 'Text ""
+    ':$$: 'Text "  " ':<>: 'ShowType x
+    ':$$: 'Text ""
     ':$$: 'Text "You probably created an infinitely recursive encoder/decoder pair."
-    ':$$: 'Text "See `Data.Aeson.Deriving.Generic.LoopWarning` for details."
+    ':$$: 'Text "See the definition `Data.Aeson.Deriving.Generic.LoopWarning` for details."
     ':$$: 'Text ""
     )
 
@@ -366,3 +374,8 @@ dropLowercasePrefix [] = []
 dropLowercasePrefix (x:xs)
   | isUpper x = x : xs
   | otherwise = dropLowercasePrefix xs
+
+infixl 2 &
+
+newtype (x & f) = Ampersand {unAmpersand :: f x }
+  deriving newtype (FromJSON, ToJSON)
