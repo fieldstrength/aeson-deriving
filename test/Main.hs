@@ -153,13 +153,13 @@ data Z = Z {zval :: String}
   deriving (FromJSON, ToJSON) via
     RemapTextField "zval" "bad" "good" (GenericEncoded '[] Z)
 
-remapped_text_fields_encode_as_expected :: Property
-remapped_text_fields_encode_as_expected = once . property $ do
+prop_remapped_text_fields_encode_as_expected :: Property
+prop_remapped_text_fields_encode_as_expected = once . property $ do
   encode (Z "bad") === "{\"zval\":\"good\"}"
   encode (Z "cat") === "{\"zval\":\"cat\"}"
 
-remapped_text_fields_decode_as_expected :: Property
-remapped_text_fields_decode_as_expected = once . property $ do
+prop_remapped_text_fields_decode_as_expected :: Property
+prop_remapped_text_fields_decode_as_expected = once . property $ do
   tripping (Z "bad") encode decode
   tripping (Z "cat") encode decode
   Just (Z "bad") === decode "{\"zval\":\"good\"}"
