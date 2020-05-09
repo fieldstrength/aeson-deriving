@@ -32,6 +32,8 @@ module Data.Aeson.Deriving.Generic
   , Uppercase
   , Lowercase
   , DropLowercasePrefix
+  , DropPrefix
+  , DropSuffix
   , Id
   , snakeCase
   , dropLowercasePrefix
@@ -57,12 +59,12 @@ import           Data.Char                              (isUpper, toLower, toUpp
 import           Data.Function                          ((&))
 import qualified Data.HashMap.Strict                    as HashMap
 import           Data.Kind                              (Constraint, Type)
-import           Data.List                              (intercalate)
+import           Data.List                              (intercalate, stripPrefix)
+import           Data.Maybe                             (fromMaybe)
 import           Data.Proxy                             (Proxy (..))
 import           Data.Text                              (pack)
 import           GHC.Generics
 import           GHC.TypeLits
-
 
 ------------------------------------------------------------------------------------------
 -- Main class
@@ -302,22 +304,38 @@ instance
 -- String functions
 ------------------------------------------------------------------------------------------
 
+stripSuffix :: Eq a => [a] -> [a] -> Maybe [a]
+stripSuffix a b = reverse <$> stripPrefix (reverse a) (reverse b)
+
+dropPrefix :: Eq a => [a] -> [a] -> [a]
+dropPrefix a b = fromMaybe b $ stripPrefix a b
+
+dropSuffix :: Eq a => [a] -> [a] -> [a]
+dropSuffix a b = fromMaybe b $ stripSuffix a b
+
 class StringFunction (a :: k) where
   stringFunction :: Proxy a -> String -> String
 
+data Id
 -- | Applies 'snakeCase'
 data SnakeCase
 data Uppercase
 data Lowercase
 -- | Applies 'dropLowercasePrefix', dropping until the first uppercase character.
 data DropLowercasePrefix
-data Id
+data DropPrefix (str :: Symbol)
+data DropSuffix (str :: Symbol)
 
+instance StringFunction Id where stringFunction _ = id
 instance StringFunction SnakeCase where stringFunction _ = snakeCase
 instance StringFunction Uppercase where stringFunction _ = map toUpper
 instance StringFunction Lowercase where stringFunction _ = map toLower
 instance StringFunction DropLowercasePrefix where stringFunction _ = dropLowercasePrefix
-instance StringFunction Id where stringFunction _ = id
+
+instance KnownSymbol str => StringFunction (DropPrefix str) where
+  stringFunction Proxy = dropPrefix (symbolVal $ Proxy @str)
+instance KnownSymbol str => StringFunction (DropSuffix str) where
+  stringFunction Proxy = dropSuffix (symbolVal $ Proxy @str)
 
 instance StringFunction '[] where stringFunction _ = id
 instance (StringFunction x, StringFunction xs) => StringFunction (x ': xs) where
