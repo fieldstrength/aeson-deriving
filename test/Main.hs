@@ -164,3 +164,25 @@ prop_remapped_text_fields_decode_as_expected = once . property $ do
   tripping (Z "cat") encode decode
   Just (Z "bad") === decode "{\"zval\":\"good\"}"
   Just (Z "cat") === decode "{\"zval\":\"cat\"}"
+
+data Reserved = Reserved
+  { type_ :: String
+  , xyzmodule :: Int
+  , control :: Char
+  }
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via
+    Reserved &
+      GenericEncoded
+        '[FieldLabelModifier := [DropPrefix "xyz", DropSuffix "_"]]
+
+prop_drop_prefix_suffix_fields_encode_as_expected :: Property
+prop_drop_prefix_suffix_fields_encode_as_expected = once . property $ do
+  encode (Reserved "Sen" 9 'x') ===
+    "{\"control\":\"x\",\"module\":9,\"type\":\"Sen\"}"
+
+prop_drop_prefix_suffix_fields_decode_as_expected :: Property
+prop_drop_prefix_suffix_fields_decode_as_expected = once . property $ do
+  tripping (Reserved "Sen" 9 'x') encode decode
+  Just (Reserved "Sen" 9 'x') ===
+    decode "{\"control\":\"x\",\"module\":9,\"type\":\"Sen\"}"
