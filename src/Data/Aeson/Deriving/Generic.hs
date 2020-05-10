@@ -82,7 +82,6 @@ import           GHC.TypeLits
 class ToAesonOptions a where
   toAesonOptions :: Proxy a -> Options
 
-
 instance ToAesonOptions '[] where toAesonOptions Proxy = defaultOptions
 instance (ToAesonOptionsField x, ToAesonOptions xs) => ToAesonOptions (x ': xs) where
   toAesonOptions Proxy =
@@ -100,6 +99,28 @@ instance (ToAesonOptionsField x, ToAesonOptions xs) => ToAesonOptions (x ': xs) 
         , tagSingleConstructors = tagSingleConstructors opts
         }
 
+-- Its easy to get confusing errors if you forget to tick the list syntax. Hence the custom error
+instance TypeError ToAesonOptionsListError => ToAesonOptions [] where toAesonOptions = undefined
+instance TypeError ToAesonOptionsListError => ToAesonOptions [a] where toAesonOptions = undefined
+
+type ToAesonOptionsListError =
+  (     'Text "aeson-deriving constraint error for ToAesonOptions class:"
+  ':$$: 'Text "Don't forget to \"tick\" your opening list bracket."
+  ':$$: 'Text "There is no ToAesonOptions instance for list types."
+  ':$$: 'Text "Rather, there are instances for promoted list values."
+  ':$$: 'Text ""
+  ':$$: 'Text "You likely should correct your deriving declaration to something like:"
+  ':$$: 'Text ""
+  ':$$: 'Text "  via GenericEncoded '[myVal1,..]"
+  ':$$: 'Text ""
+  ':$$: 'Text "Instead of:"
+  ':$$: 'Text ""
+  ':$$: 'Text "  via GenericEncoded [myVal1,..]"
+  ':$$: 'Text ""
+  ':$$: 'Text "For explanation, see GHC documentation on datatype promotion:"
+  ':$$: 'Text "https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#datatype-promotion"
+  ':$$: 'Text ""
+  )
 
 -- | A class that knows about fields of aeson's 'Options'.
 class ToAesonOptionsField x where
