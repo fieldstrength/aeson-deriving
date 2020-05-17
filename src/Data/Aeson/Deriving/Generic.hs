@@ -45,6 +45,7 @@ module Data.Aeson.Deriving.Generic
   , TaggedObject
   -- * Safety class
   , LoopWarning
+  , DisableLoopWarning(..)
   -- * Convenience newtype
   , type (&) (Ampersand)
   , unAmpersand
@@ -222,11 +223,10 @@ instance
 --   of such a newtype over the naked base type instead of the 'GenericEncoded' version.
 --   This can lead to nasty runtime bugs.
 --
---   This measure does limit prohibit some legitimate uses, although most of them should
---   be covered by this library's functionality. Please consider raising an issue if this
---   ever poses a real problem for you.
---
---   For this reason, this type error message may be removed in the future.
+--   This error can be disabled by wrapping your type in 'DisableLoopWarning'.
+--   This should never be necessary to use the functionality of this package. It may be
+--   required if you, for example, combine our newtypes with another library's types
+--   for generating aeson instances.
 type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
   LoopWarning n (GenericEncoded opts a) = ()
   LoopWarning n (RecordSumEncoded tagKey tagValMod a) = ()
@@ -255,6 +255,7 @@ type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
     )
 
 -- | Assert that you know what you're doing and to nullify the 'LoopWarning' constraint family.
+--   This should not be necessary.
 newtype DisableLoopWarning a = DisableLoopWarning a
   deriving newtype (FromJSON, ToJSON)
 
