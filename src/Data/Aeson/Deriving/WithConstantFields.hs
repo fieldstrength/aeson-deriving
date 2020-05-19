@@ -1,18 +1,18 @@
-{-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE DerivingVia          #-}
+{-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Aeson.Deriving.WithConstantFields where
 
-import Data.Aeson
-import Data.Aeson.Deriving.Utils
-import Data.Aeson.Deriving.Known
-import Data.Aeson.Deriving.Generic
-import Data.Kind (Type)
-import GHC.Generics
-import qualified Data.HashMap.Strict as HashMap
-import Data.Proxy
-import Control.Monad (unless)
+import           Control.Monad               (unless)
+import           Data.Aeson
+import           Data.Aeson.Deriving.Generic
+import           Data.Aeson.Deriving.Known
+import           Data.Aeson.Deriving.Utils
+import qualified Data.HashMap.Strict         as HashMap
+import           Data.Kind                   (Type)
+import           Data.Proxy
+import           GHC.Generics
 
 -- | Add arbitrary constant fields to the encoded object and require them when decoding.
 newtype WithConstantFields (obj :: k) (a :: Type) = WithConstantFields a

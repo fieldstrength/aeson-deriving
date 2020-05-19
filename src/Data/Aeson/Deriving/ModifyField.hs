@@ -1,16 +1,16 @@
-{-# LANGUAGE DerivingVia #-}
-{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE DerivingVia          #-}
+{-# LANGUAGE PolyKinds            #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Data.Aeson.Deriving.ModifyField where
 
-import Data.Aeson
-import Data.Aeson.Deriving.Generic
-import Data.Aeson.Deriving.Utils
-import Data.Aeson.Deriving.Known
-import GHC.TypeLits (Symbol, KnownSymbol)
-import GHC.Generics
-import Data.Proxy
+import           Data.Aeson
+import           Data.Aeson.Deriving.Generic
+import           Data.Aeson.Deriving.Known
+import           Data.Aeson.Deriving.Utils
+import           Data.Proxy
+import           GHC.Generics
+import           GHC.TypeLits                (KnownSymbol, Symbol)
 
 -- | Modify the contents of a particular field while decoding.
 newtype ModifyFieldIn (fieldName :: Symbol) fun a = ModifyFieldIn a

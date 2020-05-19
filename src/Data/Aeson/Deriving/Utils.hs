@@ -1,5 +1,5 @@
+{-# LANGUAGE PolyKinds    #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE PolyKinds #-}
 
 module Data.Aeson.Deriving.Utils
     ( mapObjects
@@ -8,12 +8,12 @@ module Data.Aeson.Deriving.Utils
     , textVal
     ) where
 
-import Data.Aeson
-import Data.Kind (Constraint)
-import Data.Text
+import           Data.Aeson
 import qualified Data.HashMap.Strict as HashMap
-import GHC.TypeLits
-import Data.Proxy
+import           Data.Kind           (Constraint)
+import           Data.Proxy
+import           Data.Text
+import           GHC.TypeLits
 
 mapObjects :: (Object -> Object) -> Value -> Value
 mapObjects f (Object o) = Object (f o)

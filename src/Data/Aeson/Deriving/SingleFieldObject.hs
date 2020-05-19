@@ -1,13 +1,13 @@
-{-# language UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Data.Aeson.Deriving.SingleFieldObject where
 
-import Data.Aeson
-import Data.Aeson.Deriving.Generic (LoopWarning)
-import Data.Text (pack)
-import GHC.TypeLits (Symbol, KnownSymbol, symbolVal)
-import GHC.Generics
-import Data.Proxy
+import           Data.Aeson
+import           Data.Aeson.Deriving.Generic (LoopWarning)
+import           Data.Proxy
+import           Data.Text                   (pack)
+import           GHC.Generics
+import           GHC.TypeLits                (KnownSymbol, Symbol, symbolVal)
 
 -- | Puts the entire output of encoding the inner type within a single field
 newtype SingleFieldObject (fieldName :: Symbol) a = SingleFieldObject a
