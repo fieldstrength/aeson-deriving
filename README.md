@@ -53,7 +53,7 @@ data Transaction = Transaction
   { transactionId :: UUID }
   deriving stock (Generic, Show)
   deriving (FromJSON, ToJSON) via
-    WithConstantFields
+    WithConstantFieldsOut
       '[ "version" := "1.0"
       , "system_info" := "👍" ]
         MyEncoding Transaction

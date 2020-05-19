@@ -25,14 +25,14 @@ import           GHC.TypeLits
 ------------------------------------------------------------------------------------------
 
 -- | A class for defining 'Options' for Aeson's Generic deriving support.
---   It is generally instantiated either by specifying all 'Options' fields, using
---   'GenericOptions', or simply be overriding a few specific fields, by giving a
---   (type-level) list. In both cases, for the sake of explicitness and to reduce the
---   possibility of mistakes, fields are specified in a record-like form using the
---   '(:=)' data type.
+--   It is generally instantiated by overriding specific fields using the instance
+--   for (type-level) list values. It can also be instantiated in a more  exhaustive way
+--   using the 'GenericOptions' type. In both cases fields are specified in a record-like
+--   form using the '(:=)' data type for explicitness.
 --
---   Users may also provide their own instances for their own data types if desired,
---   but this should not generally be necessary.
+--   See the ReadMe or tests for examples.
+--
+--   Users may also provide instances for their own phantom data types if desired.
 class ToAesonOptions a where
   toAesonOptions :: Proxy a -> Options
 
@@ -80,12 +80,20 @@ type ToAesonOptionsListError =
 class ToAesonOptionsField x where
   toAesonOptionsField :: Proxy x -> Options -> Options
 
+-- | Represents an aeson 'Options' field to be set with `(:=)`. See `ToAesonOptions`
 data FieldLabelModifier
+-- | Represents an aeson 'Options' field to be set with `(:=)`. See `ToAesonOptions`
 data ConstructorTagModifier
+-- | Represents an aeson 'Options' field to be set with `(:=)`. See `ToAesonOptions`
 data AllNullaryToStringTag
+-- | Represents an aeson 'Options' field to be set with `(:=)`. See `ToAesonOptions`
 data OmitNothingFields
--- data SumEncoding -- data type name exists in aeson
+
+-- SumEncoding type name already exists in aeson. We repurpose it.
+
+-- | Represents an aeson 'Options' field to be set with `(:=)`. See `ToAesonOptions`
 data UnwrapUnaryRecords
+-- | Represents an aeson 'Options' field to be set with `(:=)`. See `ToAesonOptions`
 data TagSingleConstructors
 
 instance StringFunction f => ToAesonOptionsField (FieldLabelModifier := f) where
@@ -109,7 +117,7 @@ instance KnownBool b => ToAesonOptionsField (TagSingleConstructors := b) where
 ------------------------------------------------------------------------------------------
 
 -- | Type-level representation of the Aeson Generic deriving 'Options'.
---   This representation is useful explicitly setting all options.
+--   This representation is useful for explicitly setting all options.
 data GenericOptions
   :: fieldLabelModifier
   -> constructorTagModifier
@@ -207,8 +215,8 @@ type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
     ':$$: 'Text ""
     )
 
--- | Assert that you know what you're doing and to nullify the 'LoopWarning' constraint family.
---   This should not be necessary.
+-- | Assert that you know what you're doing and to nullify the 'LoopWarning' constraint
+--   family. This should not be necessary.
 newtype DisableLoopWarning a = DisableLoopWarning a
   deriving newtype (FromJSON, ToJSON)
 
