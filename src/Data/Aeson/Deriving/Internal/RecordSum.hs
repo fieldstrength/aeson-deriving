@@ -1,15 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Aeson.Deriving.RecordSum.Internal where
+module Data.Aeson.Deriving.Internal.RecordSum where
 
 import           Data.Aeson
-import           Data.Aeson.Types (Parser)
+import           Data.Aeson.Types    (Parser)
+import           Data.Bifunctor      (first)
 import           Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
-import           Data.Kind (Type)
+import           Data.Kind           (Type)
 import           Data.Proxy
 import           GHC.Generics
-import           Data.Bifunctor (first)
 
 
 newtype ParserMap a = ParserMap (HashMap String (Value -> Parser a))

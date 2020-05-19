@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b3e20bb4420e350eab21f0411270266db38b40adf03cbf79d4b25fef51864edd
+-- hash: bd8e2b4289bac4670675ad3e5d5307767ea3ad1d4a053a709b95767944b84df0
 
 name:           aeson-deriving
 version:        0.1.0.0
@@ -30,6 +30,8 @@ source-repository head
 library
   exposed-modules:
       Data.Aeson.Deriving
+      Data.Aeson.Deriving.Internal.Generic
+      Data.Aeson.Deriving.Internal.RecordSum
       Data.Aeson.Deriving.Generic
       Data.Aeson.Deriving.Known
       Data.Aeson.Deriving.ModifyField
@@ -37,7 +39,6 @@ library
       Data.Aeson.Deriving.Utils
       Data.Aeson.Deriving.WithConstantFields
   other-modules:
-      Data.Aeson.Deriving.RecordSum.Internal
       Paths_aeson_deriving
   hs-source-dirs:
       src

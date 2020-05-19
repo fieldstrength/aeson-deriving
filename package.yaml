@@ -66,6 +66,8 @@ library:
 
     exposed-modules:
         - Data.Aeson.Deriving
+        - Data.Aeson.Deriving.Internal.Generic
+        - Data.Aeson.Deriving.Internal.RecordSum
         - Data.Aeson.Deriving.Generic
         - Data.Aeson.Deriving.Known
         - Data.Aeson.Deriving.ModifyField
