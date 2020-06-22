@@ -8,6 +8,8 @@ module Main where
 
 import Data.Aeson
 import Data.Aeson.Deriving
+import Data.Aeson.Deriving.Text.Unsafe
+import Data.Text
 import GHC.Generics
 import Hedgehog
 import Hedgehog.Main (defaultMain)
@@ -186,3 +188,16 @@ prop_drop_prefix_suffix_fields_decode_as_expected = once . property $ do
   tripping (Reserved "Sen" 9 'x') encode decode
   Just (Reserved "Sen" 9 'x') ===
     decode "{\"control\":\"x\",\"module\":9,\"type\":\"Sen\"}"
+
+newtype DashSeparatedWords = DashSeparatedWords Text
+  deriving stock (Generic, Show, Eq)
+  deriving (FromJSON, ToJSON) via TextWithPattern "^([A-Za-z]+-)*[A-Za-z]+$"
+
+prop_accepts_matches :: Property
+prop_accepts_matches = once . property $ do
+  tripping (DashSeparatedWords "foo-bar-baz") encode decode
+  Just (DashSeparatedWords "foo-bar-baz") === decode "\"foo-bar-baz\""
+
+prop_rejects_non_matches :: Property
+prop_rejects_non_matches = once . property $ do
+  Left "Error in $: must match regex ^([A-Za-z]+-)*[A-Za-z]+$" === eitherDecode @DashSeparatedWords "\"foo.42\""
