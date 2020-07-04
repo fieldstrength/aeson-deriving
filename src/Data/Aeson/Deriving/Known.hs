@@ -5,7 +5,6 @@ module Data.Aeson.Deriving.Known where
 
 import           Data.Aeson
 import qualified Data.HashMap.Strict as HashMap
-import           Data.Kind           (Type)
 import           Data.Proxy
 import           Data.Text           (pack)
 import           GHC.TypeLits        (KnownSymbol, Symbol, symbolVal)
@@ -13,6 +12,8 @@ import           GHC.TypeLits        (KnownSymbol, Symbol, symbolVal)
 
 infix 3 :=
 infix 6 ==>
+infix 6 :==>
+infix 6 `To`
 
 
 -- | Represents the null JSON 'Value'.
@@ -25,9 +26,13 @@ data Null
 --   See "Data.Aeson.Deriving.WithConstantFields".
 data field := (value :: k)
 
+-- | Represents the kind of functions that map the one value to another,
+--   and otherwise do nothing but return the input.
+data a :==> b = a `To` b
+
 -- | Represents a function that maps the first value to the second,
 --   and otherwise does nothing but return the input.
-data a ==> b
+type (==>) = 'To
 
 -- | Represents the function that turns nulls into the given default value.
 data WithDefault (val :: k)
@@ -68,7 +73,7 @@ instance (KnownJSONObject fields, KnownSymbol key, KnownJSON val)
 
 
 -- | JSON ('Value') functions
-class KnownJSONFunction (a :: Type) where functionVal :: Proxy a -> Value -> Value
+class KnownJSONFunction (a :: k) where functionVal :: Proxy a -> Value -> Value
 
 -- instance All KnownJSON [a, b] => KnownJSONFunction (a ==> b) where
 instance (KnownJSON a, KnownJSON b) => KnownJSONFunction (a ==> b) where
