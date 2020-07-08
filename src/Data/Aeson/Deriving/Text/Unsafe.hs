@@ -12,6 +12,6 @@ newtype TextWithPattern (regex :: Symbol) = TextWithPattern Text
 
 instance KnownSymbol regex => FromJSON (TextWithPattern regex) where
   parseJSON = withText "Text" $ \s ->
-    TextWithPattern <$> pure s <* unless (unpack s =~ (symbolVal $ Proxy @regex)) (fail errorMsg)
+    TextWithPattern s <$ unless (unpack s =~ (symbolVal $ Proxy @regex)) (fail errorMsg)
     where
       errorMsg = "must match regex " <> (symbolVal $ Proxy @regex)
