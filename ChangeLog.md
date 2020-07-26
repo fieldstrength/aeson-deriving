@@ -1,7 +1,11 @@
 # Changelog for aeson-deriving
 
-## Unreleased changes
+# Revision history for servant-openapi
 
- * A newtype for encoding Aeson's generic Options type
- * A newtype for sums of records
- * A newtype for nesting the encoding under a single field
+### 0.1.1
+
+* Added newtype for Text validated against a regex pattern [PR 2](https://github.com/fieldstrength/aeson-deriving/pull/2)
+
+## 0.1.0
+
+* First version. Released on an unsuspecting world.
