@@ -31,6 +31,7 @@ module Data.Aeson.Deriving.Generic
   , SnakeCase
   , Uppercase
   , Lowercase
+  , FirstChar
   , DropLowercasePrefix
   , DropPrefix
   , DropSuffix

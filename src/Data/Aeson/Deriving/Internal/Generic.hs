@@ -304,6 +304,7 @@ data Id
 data SnakeCase
 data Uppercase
 data Lowercase
+data FirstChar a
 -- | Applies 'dropLowercasePrefix', dropping until the first uppercase character.
 data DropLowercasePrefix
 data DropPrefix (str :: Symbol)
@@ -328,6 +329,11 @@ instance All KnownSymbol [a, b] => StringFunction (a ==> b) where
   stringFunction Proxy x
     | x == symbolVal (Proxy @a) = symbolVal (Proxy @b)
     | otherwise = x
+
+instance StringFunction a => StringFunction (FirstChar a) where
+  stringFunction Proxy = \case
+    [] -> []
+    c:cs -> stringFunction (Proxy @a) [c] ++ cs
 
 ------------------------------------------------------------------------------------------
 -- Sum type encodings

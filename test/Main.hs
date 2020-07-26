@@ -8,6 +8,7 @@ module Main where
 
 import Data.Aeson
 import Data.Aeson.Deriving
+import Data.Foldable (for_)
 import Data.Aeson.Deriving.Text.Unsafe
 import Data.Text
 import GHC.Generics
@@ -201,3 +202,18 @@ prop_accepts_matches = once . property $ do
 prop_rejects_non_matches :: Property
 prop_rejects_non_matches = once . property $ do
   Left "Error in $: must match regex ^([A-Za-z]+-)*[A-Za-z]+$" === eitherDecode @DashSeparatedWords "\"foo.42\""
+
+
+data Heavy = BlackHole | NeutronStar
+ deriving stock (Generic, Show, Eq, Ord, Bounded, Enum)
+ deriving (FromJSON, ToJSON) via GenericEncoded '[ConstructorTagModifier := FirstChar Lowercase] Heavy
+
+prop_first_char_modifier_encodes_as_expected :: Property
+prop_first_char_modifier_encodes_as_expected = once . property $ do
+  encode BlackHole === "\"blackHole\""
+  encode NeutronStar === "\"neutronStar\""
+
+prop_first_char_modifier_decodes_as_expected :: Property
+prop_first_char_modifier_decodes_as_expected = once . property $ do
+  for_ [BlackHole ..] $ \x ->
+    tripping x encode decode
