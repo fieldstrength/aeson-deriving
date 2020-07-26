@@ -40,6 +40,7 @@ dependencies:
     - aeson >= 1.2 && < 1.5
     - unordered-containers
     - text
+    - regex-tdfa
 
 tests:
     spec:

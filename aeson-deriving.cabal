@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bd8e2b4289bac4670675ad3e5d5307767ea3ad1d4a053a709b95767944b84df0
+-- hash: 10c4d376657004b7575f0a910fbcb4dd80c3a284e99343ca3f3e962eeba7cd0e
 
 name:           aeson-deriving
-version:        0.1.0.0
+version:        0.1.1
 synopsis:       data types for compositional, type-directed serialization
 description:    Please see the README on GitHub at <https://github.com/fieldstrength/aeson-deriving#readme>
 category:       Serialization
@@ -36,11 +36,11 @@ library
       Data.Aeson.Deriving.Known
       Data.Aeson.Deriving.ModifyField
       Data.Aeson.Deriving.SingleFieldObject
-      Data.Aeson.Deriving.Text
-      Data.Aeson.Deriving.Text.Unsafe
       Data.Aeson.Deriving.Utils
       Data.Aeson.Deriving.WithConstantFields
   other-modules:
+      Data.Aeson.Deriving.Text
+      Data.Aeson.Deriving.Text.Unsafe
       Paths_aeson_deriving
   hs-source-dirs:
       src
@@ -68,6 +68,7 @@ test-suite spec
     , aeson-deriving
     , base >=4.7 && <5
     , hedgehog
+    , regex-tdfa
     , text
     , unordered-containers
   default-language: Haskell2010
