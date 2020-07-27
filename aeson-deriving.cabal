@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 10c4d376657004b7575f0a910fbcb4dd80c3a284e99343ca3f3e962eeba7cd0e
+-- hash: b3e5f0ba835e20c36e8bdd897cf534710049266d3b1d4a5b68132fc9dde73661
 
 name:           aeson-deriving
 version:        0.1.1
@@ -38,9 +38,9 @@ library
       Data.Aeson.Deriving.SingleFieldObject
       Data.Aeson.Deriving.Utils
       Data.Aeson.Deriving.WithConstantFields
-  other-modules:
       Data.Aeson.Deriving.Text
       Data.Aeson.Deriving.Text.Unsafe
+  other-modules:
       Paths_aeson_deriving
   hs-source-dirs:
       src
