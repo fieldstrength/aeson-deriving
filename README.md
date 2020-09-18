@@ -23,7 +23,7 @@ type MyEncoding = GenericEncoded
 
 data User = User
   { firstName :: Text
-  , id_       :: UserId        
+  , id_       :: UserId
   , companyId :: CompanyId
   }
   deriving stock (Generic, Show)
@@ -54,26 +54,41 @@ data Transaction = Transaction
   deriving stock (Generic, Show)
   deriving (FromJSON, ToJSON) via
     WithConstantFieldsOut
-      '[ "version" := "1.0"
-      , "system_info" := "👍" ]
-        MyEncoding Transaction
+     '[ "version" := "1.0"
+      , "system_info" := "👍"
+      ]
+      (MyEncoding Transaction)
 ```
 
 Note: Some newtypes that modify the instances come in an inbound and outbound variant. For example `WithConstantFields` is defined as the composition of `WithConstantFieldsIn` and `WithConstantFieldsOut`.
+
+#### Constant Objects
+
+Sometimes you may need an entire object of constant fields, with no information passing to the haskell representation. This is modeled as a single-value type and can also be used with the `WithConstantFields` newtype, as long as the base type is wrapped in the `EmptyObject` newtype (because otherwise unit types do not serialize to the empty object by default).
+
+```haskell
+data Requirements = Requirements
+  deriving (Show, Eq, Generic)
+  deriving (FromJSON, ToJSON) via
+    WithConstantFields
+     '[ "api_version" := "2.0"
+      , "check_performed" := 'True
+      ]
+      (EmptyObject Requirements)
+```
 
 #### Apply arbitrary functions before encoding/decoding
 
 ##### Example: Special treatment for magic values
 
 ```haskell
-
 data Feedback = Feedback
   { comment :: Text }
   deriving stock (Generic, Show)
   deriving (FromJSON, ToJSON) via
     ModifyFieldIn "comment"
       ("booo!" ==> "boo-urns!")
-        MyEncoding Feedback
+      (MyEncoding Feedback)
 
 
 -- x ==> y  maps the value x to y and leaves others unchanged

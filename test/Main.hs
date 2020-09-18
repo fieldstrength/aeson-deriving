@@ -217,3 +217,37 @@ prop_first_char_modifier_decodes_as_expected :: Property
 prop_first_char_modifier_decodes_as_expected = once . property $ do
   for_ [BlackHole ..] $ \x ->
     tripping x encode decode
+
+
+data Unity = Unity
+  deriving (Show, Eq, Generic)
+  deriving (FromJSON, ToJSON) via EmptyObject Unity
+
+prop_empty_object_encodes_as_expected :: Property
+prop_empty_object_encodes_as_expected = once . property $ do
+  encode Unity === "{}"
+
+prop_empty_object_decodes_as_expected :: Property
+prop_empty_object_decodes_as_expected = once . property $ tripping Unity encode decode
+
+-- An example of how to require a particular constant object
+data Requirements = Requirements
+  deriving (Show, Eq, Generic)
+  deriving (FromJSON, ToJSON) via
+    WithConstantFields
+     '[ "api_version" := "2.0"
+      , "check_performed" := 'True
+      ]
+      (EmptyObject Requirements)
+
+prop_constant_object_encodes_as_expected :: Property
+prop_constant_object_encodes_as_expected = once . property $
+  encode Requirements === "{\"api_version\":\"2.0\",\"check_performed\":true}"
+
+prop_constant_object_decodes_as_expected :: Property
+prop_constant_object_decodes_as_expected = once . property $ tripping Requirements encode decode
+
+prop_reject_constant_object_with_incorrect_details :: Property
+prop_reject_constant_object_with_incorrect_details = once . property $
+  eitherDecode @Requirements "{\"api_version\":\"2.0\",\"check_performed\":false}"
+    === Left "Error in $: Expected constant value `Bool True` but got: Bool False"

@@ -36,6 +36,7 @@ library
       Data.Aeson.Deriving.Known
       Data.Aeson.Deriving.ModifyField
       Data.Aeson.Deriving.SingleFieldObject
+      Data.Aeson.Deriving.EmptyObject
       Data.Aeson.Deriving.Utils
       Data.Aeson.Deriving.WithConstantFields
       Data.Aeson.Deriving.Text
