@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 13bb59756d02d405b7d55bd3ba07fa0e3e02ff4a3bdf04774f8764952ec5c204
+-- hash: 05a421de32621a1d52633e1311198dbc32abe2ea1f27c1e0f003d14a579b97e5
 
 name:           aeson-deriving
-version:        0.1.1.1
+version:        0.1.1.2
 synopsis:       data types for compositional, type-directed serialization
 description:    Please see the README on GitHub at <https://github.com/fieldstrength/aeson-deriving#readme>
 category:       Serialization
