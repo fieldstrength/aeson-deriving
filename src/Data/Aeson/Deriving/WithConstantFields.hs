@@ -49,5 +49,7 @@ instance (FromJSON a, LoopWarning (WithConstantFields obj) a, KnownJSONObject ob
         flip (withObject "Object") valIn $ \obj -> do
           valActual <- obj .: key
           unless (valActual == valExpected) . fail $
-            "Expected constant value `" <> show valExpected <> "` but got: " <>
-            show valActual
+            "Expected constant value " <> showEscapedJson valExpected <>
+            " but got: " <> showEscapedJson valActual
+
+      showEscapedJson val = show (encode val)

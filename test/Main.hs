@@ -250,4 +250,4 @@ prop_constant_object_decodes_as_expected = once . property $ tripping Requiremen
 prop_reject_constant_object_with_incorrect_details :: Property
 prop_reject_constant_object_with_incorrect_details = once . property $
   eitherDecode @Requirements "{\"api_version\":\"2.0\",\"check_performed\":false}"
-    === Left "Error in $: Expected constant value `Bool True` but got: Bool False"
+    === Left "Error in $: Expected constant value \"true\" but got: \"false\""
