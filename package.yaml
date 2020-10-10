@@ -1,5 +1,5 @@
 name:                aeson-deriving
-version:             0.1.1.1
+version:             0.1.1.2
 github:              "fieldstrength/aeson-deriving"
 license:             MIT
 author:              "Cliff Harvey"
@@ -37,7 +37,7 @@ default-extensions:
 
 dependencies:
     - base >= 4.7 && < 5
-    - aeson >= 1.2 && < 1.5
+    - aeson >= 1.2 && < 1.6
     - unordered-containers
     - text
     - regex-tdfa
@@ -73,6 +73,7 @@ library:
         - Data.Aeson.Deriving.Known
         - Data.Aeson.Deriving.ModifyField
         - Data.Aeson.Deriving.SingleFieldObject
+        - Data.Aeson.Deriving.EmptyObject
         - Data.Aeson.Deriving.Utils
         - Data.Aeson.Deriving.WithConstantFields
         - Data.Aeson.Deriving.Text

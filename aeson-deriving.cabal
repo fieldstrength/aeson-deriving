@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: afa1a88618274c13cbf349c67513735bd434bd45398e9173e13419d361544a8a
+-- hash: 05a421de32621a1d52633e1311198dbc32abe2ea1f27c1e0f003d14a579b97e5
 
 name:           aeson-deriving
-version:        0.1.1.1
+version:        0.1.1.2
 synopsis:       data types for compositional, type-directed serialization
 description:    Please see the README on GitHub at <https://github.com/fieldstrength/aeson-deriving#readme>
 category:       Serialization
@@ -36,6 +36,7 @@ library
       Data.Aeson.Deriving.Known
       Data.Aeson.Deriving.ModifyField
       Data.Aeson.Deriving.SingleFieldObject
+      Data.Aeson.Deriving.EmptyObject
       Data.Aeson.Deriving.Utils
       Data.Aeson.Deriving.WithConstantFields
       Data.Aeson.Deriving.Text
@@ -47,7 +48,7 @@ library
   default-extensions: ConstraintKinds DataKinds DeriveFunctor DeriveGeneric DerivingStrategies FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving KindSignatures LambdaCase MultiParamTypeClasses NamedFieldPuns OverloadedStrings ScopedTypeVariables TupleSections TypeApplications TypeOperators
   ghc-options: -Wall -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
-      aeson >=1.2 && <1.5
+      aeson >=1.2 && <1.6
     , base >=4.7 && <5
     , regex-tdfa
     , text
@@ -64,7 +65,7 @@ test-suite spec
   default-extensions: ConstraintKinds DataKinds DeriveFunctor DeriveGeneric DerivingStrategies FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving KindSignatures LambdaCase MultiParamTypeClasses NamedFieldPuns OverloadedStrings ScopedTypeVariables TupleSections TypeApplications TypeOperators
   ghc-options: -Wall -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
-      aeson >=1.2 && <1.5
+      aeson >=1.2 && <1.6
     , aeson-deriving
     , base >=4.7 && <5
     , hedgehog

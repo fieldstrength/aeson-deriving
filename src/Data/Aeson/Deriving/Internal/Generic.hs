@@ -5,8 +5,9 @@
 module Data.Aeson.Deriving.Internal.Generic where
 
 import           Data.Aeson
-import           Data.Aeson.Deriving.Known
+import           Data.Aeson.Deriving.EmptyObject        (EmptyObject(..))
 import           Data.Aeson.Deriving.Internal.RecordSum
+import           Data.Aeson.Deriving.Known
 import           Data.Aeson.Deriving.Utils
 import           Data.Aeson.Types                       (modifyFailure)
 import           Data.Char                              (isUpper, toLower, toUpper)
@@ -191,6 +192,7 @@ instance
 type family LoopWarning (n :: Type -> Type) (a :: Type) :: Constraint where
   LoopWarning n (GenericEncoded opts a) = ()
   LoopWarning n (RecordSumEncoded tagKey tagValMod a) = ()
+  LoopWarning n (EmptyObject a) = ()
   LoopWarning n (DisableLoopWarning a) = ()
   LoopWarning n (x & f) = LoopWarning n (f x)
   LoopWarning n (f x) = LoopWarning n x
