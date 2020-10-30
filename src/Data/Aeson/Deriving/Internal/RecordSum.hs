@@ -28,6 +28,11 @@ unsafeMapKeys f (ParserMap hm)
 class GTagParserMap (repA :: Type -> Type) where
   gParserMap :: Proxy repA -> ParserMap (repA x)
 
+tagValues :: GTagParserMap repA => Proxy repA -> [String]
+tagValues p = HashMap.keys hm
+  where
+    ParserMap hm = gParserMap p
+
 -- | We can create a ParserMap from any reference to a data type that has a
 --   FromJSON instance (and at least one available constructor).
 instance (GConstructorNames (Rep a), FromJSON a) => GTagParserMap (Rec0 a) where
