@@ -66,7 +66,7 @@ test-suite spec
   default-extensions: ConstraintKinds DataKinds DeriveFunctor DeriveGeneric DerivingStrategies FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving KindSignatures LambdaCase MultiParamTypeClasses NamedFieldPuns OverloadedStrings ScopedTypeVariables TupleSections TypeApplications TypeOperators
   ghc-options: -Wall -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
-      aeson >=1.2 && <1.6
+      aeson >=1.2 && <2.1
     , aeson-deriving
     , base >=4.7 && <5
     , hedgehog
