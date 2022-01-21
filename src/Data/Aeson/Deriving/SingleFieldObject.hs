@@ -4,8 +4,8 @@ module Data.Aeson.Deriving.SingleFieldObject where
 
 import           Data.Aeson
 import           Data.Aeson.Deriving.Generic (LoopWarning)
+import qualified Data.Aeson.Key              as Key
 import           Data.Proxy
-import           Data.Text                   (pack)
 import           GHC.Generics
 import           GHC.TypeLits                (KnownSymbol, Symbol, symbolVal)
 
@@ -16,11 +16,11 @@ newtype SingleFieldObject (fieldName :: Symbol) a = SingleFieldObject a
 instance (ToJSON a, LoopWarning (SingleFieldObject fieldName) a, KnownSymbol fieldName) =>
   ToJSON (SingleFieldObject fieldName a) where
     toJSON (SingleFieldObject a) = object
-      [ ( pack . symbolVal $ Proxy @fieldName
+      [ ( Key.fromString . symbolVal $ Proxy @fieldName
         , toJSON a
         )
       ]
 
 instance (FromJSON a, LoopWarning (SingleFieldObject fieldName) a, KnownSymbol fieldName) => FromJSON (SingleFieldObject fieldName a) where
   parseJSON = withObject "Object" $ \hm ->
-    SingleFieldObject <$> hm .: (pack . symbolVal $ Proxy @fieldName)
+    SingleFieldObject <$> hm .: (Key.fromString . symbolVal $ Proxy @fieldName)

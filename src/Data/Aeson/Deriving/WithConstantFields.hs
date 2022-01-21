@@ -9,7 +9,7 @@ import           Data.Aeson
 import           Data.Aeson.Deriving.Generic
 import           Data.Aeson.Deriving.Known
 import           Data.Aeson.Deriving.Utils
-import qualified Data.HashMap.Strict         as HashMap
+import qualified Data.Aeson.KeyMap           as KeyMap
 import           Data.Kind                   (Type)
 import           Data.Proxy
 import           GHC.Generics
@@ -42,7 +42,7 @@ instance (ToJSON a, LoopWarning (WithConstantFields obj) a, KnownJSONObject obj)
 instance (FromJSON a, LoopWarning (WithConstantFields obj) a, KnownJSONObject obj) => FromJSON (WithConstantFields obj a) where
   parseJSON valIn = WithConstantFields <$>
     parseJSON valIn <*
-      HashMap.traverseWithKey assertFieldPresent (objectVal $ Proxy @obj)
+      KeyMap.traverseWithKey assertFieldPresent (objectVal $ Proxy @obj)
 
     where
       assertFieldPresent key valExpected =
