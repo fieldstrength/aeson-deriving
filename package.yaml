@@ -37,7 +37,7 @@ default-extensions:
 
 dependencies:
     - base >= 4.7 && < 5
-    - aeson >= 1.2 && < 1.6
+    - aeson >= 1.2 && < 2.1
     - unordered-containers
     - text
     - regex-tdfa
