@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ff3ee2e6593f8b9feca36b68f4f2ea33c8ab4fa29bc21f93fdb6fd4f6a18f562
+-- hash: 1c880fec6ffe0ae321592e74f2b498ff5f96b509591edce157bc938b36f5d0f6
 
 name:           aeson-deriving
 version:        0.1.1.2
@@ -67,6 +67,7 @@ library
   build-depends:
       aeson >=1.2 && <2.2
     , base >=4.7 && <5
+    , mtl
     , regex-tdfa
     , text
     , unordered-containers
@@ -103,6 +104,7 @@ test-suite spec
     , aeson-deriving
     , base >=4.7 && <5
     , hedgehog
+    , mtl
     , regex-tdfa
     , text
     , unordered-containers
