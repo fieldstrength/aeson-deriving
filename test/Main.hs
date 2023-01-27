@@ -33,7 +33,7 @@ once = withTests 1
 
 prop_fido_encodes_as_expected :: Property
 prop_fido_encodes_as_expected = once . property $
-  encode (Dog 9 "fido") === "{\"name\":\"fido\",\"age_in_dog_years\":9}"
+  encode (Dog 9 "fido") === "{\"age_in_dog_years\":9,\"name\":\"fido\"}"
 
 prop_fido_decodes_as_expected :: Property
 prop_fido_decodes_as_expected = once . property $
@@ -91,7 +91,7 @@ data X = X {xval :: Int}
 prop_WithConstantFields_extra_fields_encode_as_expected :: Property
 prop_WithConstantFields_extra_fields_encode_as_expected = once . property $
   encode (X 9)
-    === "{\"xval\":9,\"arr\":[\"Hilbert\",\"Dirac\"],\"quux\":1,\"bar\":\"baaz\"}"
+    === "{\"arr\":[\"Hilbert\",\"Dirac\"],\"bar\":\"baaz\",\"quux\":1,\"xval\":9}"
 
 prop_WithConstantFields_extra_fields_decode_as_expected :: Property
 prop_WithConstantFields_extra_fields_decode_as_expected = once . property $
@@ -111,7 +111,7 @@ data X2 = X2 {xval :: Int}
 prop_WithConstantFieldsOut_encodes_as_expected :: Property
 prop_WithConstantFieldsOut_encodes_as_expected = once . property $
   encode (X2 9)
-    === "{\"xval\":9,\"quux\":\"axion\",\"bar\":\"baaz\"}"
+    === "{\"bar\":\"baaz\",\"quux\":\"axion\",\"xval\":9}"
 
 prop_WithConstantFieldsOut_extra_fields_not_required_when_decoding :: Property
 prop_WithConstantFieldsOut_extra_fields_not_required_when_decoding = once . property $
@@ -131,7 +131,7 @@ prop_WithConstantFieldsIn_encodes_as_expected = once . property $
 
 prop_WithConstantFieldsIn_decodes_as_expected :: Property
 prop_WithConstantFieldsIn_decodes_as_expected = once . property $
-  decode @X3 "{\"xval\":9,\"quux\":\"axion\",\"bar\":\"baaz\"}" === Just (X3 9)
+  decode @X3 "{\"bar\":\"baaz\",\"quux\":\"axion\",\"xval\":9}" === Just (X3 9)
 
 prop_WithConstantFieldsIn_extra_fields_required_when_decoding :: Property
 prop_WithConstantFieldsIn_extra_fields_required_when_decoding = once . property $

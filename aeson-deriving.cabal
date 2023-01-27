@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.7.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 05a421de32621a1d52633e1311198dbc32abe2ea1f27c1e0f003d14a579b97e5
+-- hash: 1c880fec6ffe0ae321592e74f2b498ff5f96b509591edce157bc938b36f5d0f6
 
 name:           aeson-deriving
 version:        0.1.1.2
@@ -45,11 +45,29 @@ library
       Paths_aeson_deriving
   hs-source-dirs:
       src
-  default-extensions: ConstraintKinds DataKinds DeriveFunctor DeriveGeneric DerivingStrategies FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving KindSignatures LambdaCase MultiParamTypeClasses NamedFieldPuns OverloadedStrings ScopedTypeVariables TupleSections TypeApplications TypeOperators
+  default-extensions:
+      ConstraintKinds
+      DataKinds
+      DeriveFunctor
+      DeriveGeneric
+      DerivingStrategies
+      FlexibleContexts
+      FlexibleInstances
+      GeneralizedNewtypeDeriving
+      KindSignatures
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      OverloadedStrings
+      ScopedTypeVariables
+      TupleSections
+      TypeApplications
+      TypeOperators
   ghc-options: -Wall -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
-      aeson >=1.2 && <1.6
+      aeson >=1.2 && <2.2
     , base >=4.7 && <5
+    , mtl
     , regex-tdfa
     , text
     , unordered-containers
@@ -62,13 +80,31 @@ test-suite spec
       Paths_aeson_deriving
   hs-source-dirs:
       test
-  default-extensions: ConstraintKinds DataKinds DeriveFunctor DeriveGeneric DerivingStrategies FlexibleContexts FlexibleInstances GeneralizedNewtypeDeriving KindSignatures LambdaCase MultiParamTypeClasses NamedFieldPuns OverloadedStrings ScopedTypeVariables TupleSections TypeApplications TypeOperators
+  default-extensions:
+      ConstraintKinds
+      DataKinds
+      DeriveFunctor
+      DeriveGeneric
+      DerivingStrategies
+      FlexibleContexts
+      FlexibleInstances
+      GeneralizedNewtypeDeriving
+      KindSignatures
+      LambdaCase
+      MultiParamTypeClasses
+      NamedFieldPuns
+      OverloadedStrings
+      ScopedTypeVariables
+      TupleSections
+      TypeApplications
+      TypeOperators
   ghc-options: -Wall -Wredundant-constraints -Wincomplete-record-updates -Wincomplete-uni-patterns
   build-depends:
-      aeson >=1.2 && <1.6
+      aeson >=1.2 && <2.2
     , aeson-deriving
     , base >=4.7 && <5
     , hedgehog
+    , mtl
     , regex-tdfa
     , text
     , unordered-containers

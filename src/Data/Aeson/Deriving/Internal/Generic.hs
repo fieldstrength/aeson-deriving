@@ -9,6 +9,7 @@ import           Data.Aeson.Deriving.EmptyObject        (EmptyObject(..))
 import           Data.Aeson.Deriving.Internal.RecordSum
 import           Data.Aeson.Deriving.Known
 import           Data.Aeson.Deriving.Utils
+import qualified Data.Aeson.Key                         as Key
 import           Data.Aeson.Types                       (modifyFailure)
 import           Data.Char                              (isUpper, toLower, toUpper)
 import           Data.Function                          ((&))
@@ -17,7 +18,6 @@ import           Data.Kind                              (Constraint, Type)
 import           Data.List                              (intercalate, stripPrefix)
 import           Data.Maybe                             (fromMaybe)
 import           Data.Proxy                             (Proxy (..))
-import           Data.Text                              (pack)
 import           GHC.Generics
 import           GHC.TypeLits
 
@@ -250,7 +250,7 @@ instance
   , KnownSymbol tagKey)
     => FromJSON (RecordSumEncoded tagKey tagModifier a) where
       parseJSON val = prependErrMsg outerErrorMsg . flip (withObject "Object") val $ \hm -> do
-        tagVal <- hm .: pack tagKeyStr
+        tagVal <- hm .: Key.fromString tagKeyStr
         case HashMap.lookup tagVal parserMap of
           Nothing -> fail . mconcat $
             [ "We are not expecting a payload with tag value " <> backticks tagVal

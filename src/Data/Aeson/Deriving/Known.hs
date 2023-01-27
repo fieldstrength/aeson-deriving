@@ -4,7 +4,9 @@
 module Data.Aeson.Deriving.Known where
 
 import           Data.Aeson
-import qualified Data.HashMap.Strict as HashMap
+import qualified Data.Aeson.Key      as Key
+import qualified Data.Aeson.KeyMap   as KeyMap
+
 import           Data.Kind           (Type)
 import           Data.Proxy
 import           Data.Text           (pack)
@@ -61,8 +63,8 @@ instance KnownJSONObject '[] where objectVal Proxy = mempty
 instance (KnownJSONObject fields, KnownSymbol key, KnownJSON val)
   => KnownJSONObject ((key := val) ': fields) where
     objectVal Proxy =
-      HashMap.insert
-        (pack . symbolVal $ Proxy @key)
+      KeyMap.insert
+        (Key.fromString . symbolVal $ Proxy @key)
         (jsonVal $ Proxy @val)
         (objectVal $ Proxy @fields)
 
